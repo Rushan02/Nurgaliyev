@@ -1,0 +1,209 @@
+CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+USE `mydb` ;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`User`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`User` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`User` (
+  `Id` INT NOT NULL,
+  `Email` VARCHAR(45) NULL,
+  `Password` VARCHAR(45) NULL,
+  `Name` VARCHAR(45) NULL,
+  `Time_registration` DATE NULL,
+  PRIMARY KEY (`Id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Friends`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`Friends` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`Friends` (
+  `Id` INT NOT NULL,
+  `Time creation` VARCHAR(45) NULL,
+  `User_from_id` VARCHAR(45) NULL,
+  `User_Id` INT NOT NULL,
+  `User_Id1` INT NOT NULL,
+  PRIMARY KEY (`Id`, `User_Id`, `User_Id1`),
+  INDEX `fk_Friends_User1_idx` (`User_Id` ASC) VISIBLE,
+  INDEX `fk_Friends_User2_idx` (`User_Id1` ASC) VISIBLE,
+  CONSTRAINT `fk_Friends_User1`
+    FOREIGN KEY (`User_Id`)
+    REFERENCES `mydb`.`User` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Friends_User2`
+    FOREIGN KEY (`User_Id1`)
+    REFERENCES `mydb`.`User` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Albums`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`Albums` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`Albums` (
+  `Id` INT NOT NULL,
+  `Name` VARCHAR(45) NULL,
+  `Time creation` DATE NULL,
+  `User_Id` INT NOT NULL,
+  PRIMARY KEY (`Id`, `User_Id`),
+  INDEX `fk_Albums_User1_idx` (`User_Id` ASC) VISIBLE,
+  CONSTRAINT `fk_Albums_User1`
+    FOREIGN KEY (`User_Id`)
+    REFERENCES `mydb`.`User` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Photos`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`Photos` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`Photos` (
+  `Id` INT NOT NULL,
+  `Path` VARCHAR(45) NULL,
+  `Deseription` VARCHAR(45) NULL,
+  `Time creation` DATE NULL,
+  `Albums_Id` INT NOT NULL,
+  PRIMARY KEY (`Id`, `Albums_Id`),
+  INDEX `fk_Photos_Albums1_idx` (`Albums_Id` ASC) VISIBLE,
+  CONSTRAINT `fk_Photos_Albums1`
+    FOREIGN KEY (`Albums_Id`)
+    REFERENCES `mydb`.`Albums` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Tags`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`Tags` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`Tags` (
+  `Id` INT NOT NULL,
+  `Name` VARCHAR(45) NULL,
+  `Messages to photos_Id` INT NOT NULL,
+  PRIMARY KEY (`Id`, `Messages to photos_Id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Tags to potos`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`Tags to potos` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`Tags to potos` (
+  `Id` INT NOT NULL,
+  `Tags_Id` INT NOT NULL,
+  `Photos_Id` INT NOT NULL,
+  PRIMARY KEY (`Id`, `Photos_Id`, `Tags_Id`),
+  INDEX `fk_Tags to potos_Tags1_idx` (`Tags_Id` ASC) VISIBLE,
+  INDEX `fk_Tags to potos_Photos1_idx` (`Photos_Id` ASC) VISIBLE,
+  CONSTRAINT `fk_Tags to potos_Tags1`
+    FOREIGN KEY (`Tags_Id`)
+    REFERENCES `mydb`.`Tags` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Tags to potos_Photos1`
+    FOREIGN KEY (`Photos_Id`)
+    REFERENCES `mydb`.`Photos` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`chat`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`chat` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`chat` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(45) NULL,
+  `admin_id` INT NOT NULL,
+  PRIMARY KEY (`id`, `admin_id`),
+  INDEX `fk_chat_User1_idx` (`admin_id` ASC) VISIBLE,
+  CONSTRAINT `fk_chat_User1`
+    FOREIGN KEY (`admin_id`)
+    REFERENCES `mydb`.`User` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Messages`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`Messages` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`Messages` (
+  `Id` INT NOT NULL,
+  `Text` VARCHAR(45) NULL,
+  `Time creation` DATE NULL,
+  `Text changed` VARCHAR(45) NULL,
+  `User_from_Id` INT NOT NULL,
+  `User_Id` INT NOT NULL,
+  `Photos_Id` INT NOT NULL,
+  `Photos_Albums_Id` INT NOT NULL,
+  `chat_id` INT NOT NULL,
+  `chat_admin_id` INT NOT NULL,
+  PRIMARY KEY (`Id`, `User_Id`, `User_from_Id`, `Photos_Id`, `Photos_Albums_Id`, `chat_id`, `chat_admin_id`),
+  INDEX `fk_Messages_User1_idx` (`User_from_Id` ASC) VISIBLE,
+  INDEX `fk_Messages_User2_idx` (`User_Id` ASC) VISIBLE,
+  INDEX `fk_Messages_Photos1_idx` (`Photos_Id` ASC, `Photos_Albums_Id` ASC) VISIBLE,
+  INDEX `fk_Messages_chat1_idx` (`chat_id` ASC, `chat_admin_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Messages_User1`
+    FOREIGN KEY (`User_from_Id`)
+    REFERENCES `mydb`.`User` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Messages_User2`
+    FOREIGN KEY (`User_Id`)
+    REFERENCES `mydb`.`User` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Messages_Photos1`
+    FOREIGN KEY (`Photos_Id` , `Photos_Albums_Id`)
+    REFERENCES `mydb`.`Photos` (`Id` , `Albums_Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Messages_chat1`
+    FOREIGN KEY (`chat_id` , `chat_admin_id`)
+    REFERENCES `mydb`.`chat` (`id` , `admin_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`User_has_chat`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`User_has_chat` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`User_has_chat` (
+  `User_Id` INT NOT NULL,
+  `chat_id` INT NOT NULL,
+  PRIMARY KEY (`User_Id`, `chat_id`),
+  INDEX `fk_User_has_chat_chat1_idx` (`chat_id` ASC) VISIBLE,
+  INDEX `fk_User_has_chat_User1_idx` (`User_Id` ASC) VISIBLE,
+  CONSTRAINT `fk_User_has_chat_User1`
+    FOREIGN KEY (`User_Id`)
+    REFERENCES `mydb`.`User` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_User_has_chat_chat1`
+    FOREIGN KEY (`chat_id`)
+    REFERENCES `mydb`.`chat` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
